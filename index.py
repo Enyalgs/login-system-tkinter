@@ -2,6 +2,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+import DataBaser
 
 corPrincipal = '#14171c'
 
@@ -49,8 +50,25 @@ PassEntry = ttk.Entry(RightFrame, width=30, show="*")
 PassLabel.place(x=78, y=150)
 PassEntry.place(x=80, y=170)
 
+def Login():
+    User = UserEntry.get()
+    Password = PassEntry.get()
+    if(User == "" or Password == ""):
+        messagebox.showerror(title="Register Error", message="Complete all Fields of the Login")
+    else:
+        DataBaser.cursor.execute("""
+            SELECT * FROM Users
+            WHERE User = ? AND Password = ?
+        """, (User, Password))
+        VerifyLogin = DataBaser.cursor.fetchone()
+        try:
+            if(User in VerifyLogin and Password in VerifyLogin):
+                messagebox.showinfo(title="Login Info", message="Acess Confirmed")
+        except:
+            messagebox.showerror(title="Login Erro", message="Acces Denied")
+
 #Buttons -Login
-LoginButton = ttk.Button(RightFrame, text="Login", width=20)
+LoginButton = ttk.Button(RightFrame, text="Login", width=20, command=Login)
 LoginButton.place(x=115, y=210)
 
 def Register():
@@ -60,25 +78,40 @@ def Register():
     LogoUserLabel.place(x=4444)
     TituloLoginLabel.place(x=4444)
     #Inserindo Widgets de cadastro
-    NomeLabel = Label(RightFrame, text="Name:", font=("Century Gothic", 10), bg=corPrincipal, fg="white")
+    NameLabel = Label(RightFrame, text="Name:", font=("Century Gothic", 10), bg=corPrincipal, fg="white")
     EmailLabel = Label(RightFrame, text="Email:",font=("Century Gothic", 10), bg=corPrincipal, fg="white")
     
-    NomeEntry = ttk.Entry(RightFrame, width=30)
+    NameEntry = ttk.Entry(RightFrame, width=30)
     EmailEntry = ttk.Entry(RightFrame, width=30)
 
+    def RegisterToDataBase():
+        Name = NameEntry.get()
+        Email = EmailEntry.get()
+        User = UserEntry.get()
+        Password = PassEntry.get()
 
-    Register = ttk.Button(RightFrame, text="Register", width=20)
+        if(Name == "" or Email == "" or User == "" or Password == ""):
+            messagebox.showerror(title="Register Error", message="Complete all Fields of the Registration")
+        else:
+            DataBaser.cursor.execute("""
+                INSERT INTO Users(Name, Email, User, Password) 
+                VALUES(?, ?, ?, ?)
+            """, (Name, Email, User, Password))
+            DataBaser.connection.commit()
+            messagebox.showinfo(title="Register Info", message="Account Successfully Created")
 
-    NomeLabel.place(x=78, y = 5)
-    NomeEntry.place(x= 80, y = 25)
+    Register = ttk.Button(RightFrame, text="Register", width=20, command=RegisterToDataBase)
+
+    NameLabel.place(x=78, y = 5)
+    NameEntry.place(x= 80, y = 25)
     EmailLabel.place(x=78, y = 50)
     EmailEntry.place(x= 80, y = 70)
     Register.place(x=115, y=210)
 
     def BackToLogin():
         #Removendo Widgets de cadastro
-        NomeLabel.place(x=4444)
-        NomeEntry.place(x=4444)
+        NameLabel.place(x=4444)
+        NameEntry.place(x=4444)
         EmailLabel.place(x=4444)
         EmailEntry.place(x=4444)
         Register.place(x=4444)
